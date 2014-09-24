@@ -171,5 +171,26 @@
 			// Test array after successful delete
 			expect(scope.bookmarks.length).toBe(0);
 		}));
+
+		it('$scope.refreshQuery() should send GET request after timeout', inject(function(Bookmarks, $timeout) {
+			// Create sample Bookmark using the Bookmarks service
+			var sampleBookmark = new Bookmarks({
+				name: 'New Bookmark',
+				url: 'http://example.com'
+			});
+
+			// Create a sample Bookmarks array that includes the new Bookmark
+			var sampleBookmarks = [sampleBookmark];
+
+			// Set GET response
+			$httpBackend.expectGET('bookmarks?q=example').respond(sampleBookmarks);
+
+			scope.searchTerm = 'example';
+			scope.refreshQuery();
+			$timeout.flush();
+			$httpBackend.flush();
+
+			expect(scope.bookmarks.length).toBe(1);
+		}));
 	});
 }());

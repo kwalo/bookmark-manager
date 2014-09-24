@@ -1,8 +1,8 @@
 'use strict';
 
 // Bookmarks controller
-angular.module('bookmarks').controller('BookmarksController', ['$scope', '$http', '$stateParams', '$location', 'Authentication', 'Bookmarks',
-	function($scope, $http, $stateParams, $location, Authentication, Bookmarks ) {
+angular.module('bookmarks').controller('BookmarksController', ['$scope', '$http', '$stateParams', '$location', '$timeout', 'Authentication', 'Bookmarks',
+	function($scope, $http, $stateParams, $location, $timeout, Authentication, Bookmarks ) {
 		$scope.authentication = Authentication;
 		$scope.searchTerm = '';
 
@@ -57,7 +57,24 @@ angular.module('bookmarks').controller('BookmarksController', ['$scope', '$http'
 
 		// Find a list of Bookmarks
 		$scope.find = function() {
-				$scope.bookmarks = Bookmarks.query({q: $scope.searchTerm});
+				//$scope.bookmarks = Bookmarks.query({q: $scope.searchTerm});
+				var bookmarks = Bookmarks.query({q: $scope.searchTerm}, function() {
+					if (bookmarks.length) {
+						$scope.bookmarks = bookmarks;
+					}
+				});
+		};
+
+		$scope.refreshQuery = function() {
+			if ($scope.timerPromise) {
+				$scope.timerPromise.cancel();
+			}
+			$scope.timerPromise = $timeout(function() {
+				$scope.find();
+			}, 500)
+			.then(function() {
+				delete $scope.timerPromise;
+			});
 		};
 
 		// Find existing Bookmark
